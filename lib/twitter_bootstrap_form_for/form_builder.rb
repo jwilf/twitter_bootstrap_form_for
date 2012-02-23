@@ -38,11 +38,21 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
   # and the appropriate markup. All toggle buttons should be rendered
   # inside of here, and will not look correct unless they are.
   #
-  def toggles(label = nil, &block)
-    template.content_tag(:div, :class => 'control-group') do
-      template.concat template.content_tag(:label, label, :class => 'control-label')
+  def toggles(label = nil, attribute = nil, &block)
+    klasses = 'control-group'
+    unless attribute.nil?
+      if errors_on?(attribute) 
+        klasses << ' error'
+        errors = true
+      end
+    end
+    template.content_tag(:div, :class => klasses) do
+      template.concat template.content_tag(:label, label, :class => 'control-label') unless label.nil?
       template.concat template.content_tag(:div, :class => "controls") {
         block.call
+        template.concat template.content_tag(:div, :class => "clearfix error") {
+          template.concat error_span(attribute)
+        } if errors
       }
     end
   end
@@ -68,7 +78,7 @@ class TwitterBootstrapFormFor::FormBuilder < ActionView::Helpers::FormBuilder
   # Creates bootstrap wrapping before yielding a plain old rails builder
   # to the supplied block.
   #
-  def inline(label = nil, &block)
+  def inline(label = nil, attribute = nil, &block)
     template.content_tag(:div, :class => 'control-group') do
       template.concat template.content_tag(:label, label, :class => 'control-label') if label.present?
       template.concat template.content_tag(:div, :class => 'controls') {
